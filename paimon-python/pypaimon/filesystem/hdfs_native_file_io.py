@@ -562,17 +562,13 @@ class HdfsNativeFileIO(FileIO):
     def write_orc(self, path: str, data: pyarrow.Table,
                   compression: str = 'zstd', zstd_level: int = 1, **kwargs):
         try:
-            import sys
             import pyarrow.orc as orc
             data = self._cast_time_columns_for_orc(data)
             with self.new_output_stream(path) as raw_stream:
                 stream = pyarrow.PythonFile(raw_stream, mode='wb')
                 try:
-                    if sys.version_info[:2] == (3, 6):
-                        orc.write_table(data, stream, **kwargs)
-                    else:
-                        orc.write_table(
-                            data, stream, compression=compression, **kwargs)
+                    orc.write_table(
+                        data, stream, compression=compression, **kwargs)
                 finally:
                     stream.close()
         except Exception as e:

@@ -307,7 +307,6 @@ class LocalFileIO(FileIO):
     def write_orc(self, path: str, data: pyarrow.Table, compression: str = 'zstd',
                   zstd_level: int = 1, **kwargs):
         try:
-            import sys
             import pyarrow.orc as orc
             
             file_path = self._to_file(path)
@@ -318,10 +317,7 @@ class LocalFileIO(FileIO):
             data = self._cast_time_columns_for_orc(data)
             
             with open(file_path, 'wb') as f:
-                if sys.version_info[:2] == (3, 6):
-                    orc.write_table(data, f, **kwargs)
-                else:
-                    orc.write_table(data, f, compression=compression, **kwargs)
+                orc.write_table(data, f, compression=compression, **kwargs)
         except Exception as e:
             self.delete_quietly(path)
             raise RuntimeError(f"Failed to write ORC file {path}: {e}") from e
